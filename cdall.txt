@@ -168,3 +168,60 @@ Execution
 lex exp3.l
 gcc lex.yy.c -ll
 ./a.out
+
+___________________________________________________________________________________________________________________________________________________________________
+
+
+Experiment 4
+
+Variable recognition using YACC
+
+Source code:
+Code in exp4.l:
+
+%{
+#include"y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+ {yylval=atoi(yytext); return NUMBER;}
+[a-zA-Z]+ {return ID;}
+[\t]+ ;
+\n {return 0;}
+. {return yytext[0];}
+%%
+
+
+
+Code in exp4.y:
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+%token NUMBER ID
+%left '+' '-'
+%left '*' '/'
+%%
+expr: expr '+' expr
+    |expr '-' expr
+|expr '*' expr
+|expr '/' expr
+|'-'NUMBER
+|'-'ID
+|'('expr')'
+|NUMBER
+|ID
+%%
+
+int yyerror(char *s)
+{
+    printf("\nExpression is invalid");
+    exit(0);
+}
+int main()
+{
+    printf("Enter the expression\n");
+    yyparse();
+    printf("\nExpression is valid\n");
+    exit(0);
+}
