@@ -517,6 +517,245 @@ int main(){
 	return 0;
 }
 
+Execution 
+
+lex exp8.l
+yacc -d exp8.y
+gcc lex.yy.c y.tab.c -ll
+./a.out
+1+2*(6/2);
 
 
+___________________________________________________________________________________________________________________________________________________________________
+
+
+Experiment 9
+
+Type Checking using Lex and Yacc
+
+Source code:
+Code in exp9.l
+
+%{
+#include "y.tab.h"
+%}
+%%
+[0-9]+ { yylval.ival = atoi(yytext); return NUM; } [-+*/=]
+{ return yytext[0]; }
+[ \t\n] ; // Ignore whitespace
+. { return yytext[0]; }
+%%
+
+
+
+Code in exp9.y
+
+%{
+#include <stdio.h>
+%}
+%token NUM
+%left '+' '-'
+%left '*' '/'
+%type <ival> expression
+%union
+{
+int ival;
+}
+%%
+expression:
+NUM { $$ = NUM; }
+| expression '+' expression {
+if ($1 == NUM && $3 == NUM) {
+$$ = NUM;
+printf("Valid\n");
+exit(0);}
+}
+| expression '-' expression { if
+($1 == NUM || $3 == NUM) {
+$$ = NUM;
+printf("Valid\n"); exit(0);}
+}
+;
+%%
+int main() {
+yyparse();
+return 0;
+}
+yyerror(char *s)
+{
+printf("Type Error\n");
+}
+
+___________________________________________________________________________________________________________________________________________________________________
+
+Experiment 10
+
+Code Optimization Technique
+
+Source code:
+Code in exp10.c
+
+#include<stdio.h>
+#include<string.h>
+struct op
+{
+char l;
+char r[20];
+}
+op[10],pr[10];
+void main()
+{
+int a,i,k,j,n,z=0,m,q;
+char *p,*l;
+char temp,t;
+char *tem;
+printf("Enter the Number of
+Values:"); scanf("%d",&n);
+for(i=0;i<n;i++)
+{
+printf("left: ");
+scanf(" %c",&op[i].l);
+printf("right: ");
+scanf(" %s",&op[i].r);
+}
+printf("Intermediate Code\n") ;
+for(i=0;i<n;i++)
+{
+printf("%c=",op[i].l);printf("%s\n",op[i].r);
+}
+for(i=0;i<n-1;i++)
+{
+temp=op[i].l;
+for(j=0;j<n;j++)
+{
+p=strchr(op[j].r,temp);
+if(p)
+{
+pr[z].l=op[i].l;
+strcpy(pr[z].r,op[i].
+r);
+z++;
+}}}
+pr[z].l=op[n-1].l;
+strcpy(pr[z].r,op[n-1].r);
+z++;
+printf("\nAfter Dead Code Elimination\n");
+for(k=0;k<z;k++)
+{
+printf("%c\t=",pr[k].l);
+printf("%s\n",pr[k].r);
+}
+for(m=0;m<z;m++)
+{
+tem=pr[m].r;
+for(j=m+1;j<z;j++){
+p=strstr(tem,pr[j].r);
+if(p)
+{
+t=pr[j].l;
+pr[j].l=pr[m].l;
+for(i=0;i<z;i++)
+{
+l=strchr(pr[i].r,t) ;
+if(l)
+{
+a=l-pr[i].r;
+printf("pos: %d\n",a);
+pr[i].r[a]=pr[m].l;
+}}}}}
+printf("Eliminate Common Expression\n");
+for(i=0;i<z;i++)
+{
+printf("%c\t=",pr[i].l);
+printf("%s\n",pr[i].r);
+}
+for(i=0;i<z;i++)
+{
+for(j=i+1;j<z;j++)
+{
+q=strcmp(pr[i].r,pr[j].r);
+if((pr[i].l==pr[j].l)&&!q)
+{pr[i].l='\0';
+}
+}
+}
+printf("Optimized Code\n");
+for(i=0;i<z;i++)
+{
+if(pr[i].l!='\0')
+{
+printf("%c=",pr[i].l);
+printf("%s\n",pr[i].r);
+}}}
+
+
+Execution
+
+gcc exp10.c
+./a.out
+
+
+___________________________________________________________________________________________________________________________________________________________________
+
+Experiment 11
+
+Backend of the Compiler
+
+Source code:
+
+Code in exp11.c
+
+#include<stdio.h>
+#include<stdio.h>
+#include<string.h>
+void main()
+{
+    char icode[10][30],str[20],opr[10];
+    int i=0;
+    printf("\n Enter the set of intermediate code (terminated by exit):\n");
+    do
+    {
+        scanf("%s",icode[i]);
+    } while(strcmp(icode[i++],"exit")!=0);
+    printf("\n target code generation");
+    printf("\n************************");
+    i=0;
+    do
+    {
+        strcpy(str,icode[i]);
+        switch(str[3])
+        {
+            case '+':
+                strcpy(opr,"ADD");
+                break;
+            case '-':
+                strcpy(opr,"SUB");
+                break;
+            case '*':strcpy(opr,"MUL");
+                     break;
+            case '/':
+                     strcpy(opr,"DIV");
+                     break;
+        }
+        printf("\n\tMov %c,R%d",str[2],i);
+        printf("\n\t%s%c,R%d",opr,str[4],i);
+        printf("\n\tMov R%d,%c",i,str[0]);
+    }while(strcmp(icode[++i],"exit")!=0);
+    printf("\n");
+}
+
+Execution:
+
+gcc exp11.c 
+./a.out 
+
+Enter the set of intermediate code (terminated by exit):
+c=a+b
+exit
+
+ target code generation
+************************
+	Mov a,R0
+	ADDb,R0
+	Mov R0,c
 
