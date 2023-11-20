@@ -24,7 +24,8 @@ Experiment 2
 
 Identifier Recognition using lex
 
-Source code:
+Source code: 
+Code in exp2.l
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,3 +74,97 @@ int main() {
 yylex();
 return 0;
 }
+
+Execution
+
+lex exp2.l
+gcc lex.yy.c -ll
+./a.out
+
+___________________________________________________________________________________________________________________________________________________________________
+
+
+Experiment 3
+
+Lexical Analyser using Lex
+
+Source code:
+Code in exp3.l
+%{
+int COMMENT=0;
+%}
+identifier [a-zA-Z][a-zA-Z0-9]*
+%%
+#.* {printf("\n%s is a preprocessor directive",yytext);}
+int |
+float |
+char |
+double |
+while |
+for |
+struct |
+typedef |
+do |
+if |
+break |
+continue |
+void |
+switch |
+return |
+main |
+else |
+goto {printf("\n%s is a keyword",yytext);}
+"/*" {printf("\n%s is a comment",yytext);}
+\{ {printf("\n%s --> BLOCK BEGINS",yytext);}
+\} {printf("\n%s --> BLOCK ENDS",yytext);}
+{identifier}(\[[0-9]*\])? {printf("\n%s is a valid identifier",yytext);}
+\".*\" {printf("\n%s is a string",yytext);}
+[0-9]+ {printf("\n%s is a number ",yytext);}
+= {printf("\n%s is an Assignment operator",yytext);}
+\<= |
+\>= |
+\< |
+== |
+\> {printf("\n%s is a Relational Operator",yytext);}
+\+ |
+\- |
+\* |
+\/ {printf("\n%s is an Arithmetic operator",yytext);}
+\; |
+\, |\! |
+\: |
+\& {printf("\n%s is a punctuation mark",yytext);}
+\(
+\) {}
+%%
+int main(int argc,char **argv) {
+FILE *file;
+file=fopen("sample.c","r");
+if(!file)
+{
+printf("could not open file");
+exit(0);
+}
+yyin=file;
+yylex();
+return 0;
+}
+int yywrap()
+{
+return (1);
+}
+
+Input file: sample.c
+----------
+#include<stdio.h>
+void main(){
+int a,b;
+c=a+b;
+printf("c=%d",c);
+}
+
+Execution 
+
+lex exp3.l
+gcc lex.yy.c -ll
+./a.out
