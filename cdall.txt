@@ -1,0 +1,75 @@
+Experiment 1
+Language processing system using GNU compiler Collection
+Internal Working of GCC
+
+Source code:
+Code in exp1.c
+#include <stdio.h>
+void main()
+{
+printf("Hello\n");
+}
+
+Execution 
+
+cpp exp1.c -o exp1.i
+gcc -S exp1.i
+as exp1.s -o exp1.o
+ld --dynamic-linker /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /usr/lib/x86_64-linux-gnu/crt1.o /usr/lib/x86_64-linux-gnu/crti.o /usr/lib/x86_64-linux-gnu/crtn.o exp1.o -lc -o exp1
+./exp1
+
+___________________________________________________________________________________________________________________________________________________________________
+
+Experiment 2
+
+Identifier Recognition using lex
+
+Source code:
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+char temp[10],pun[10];
+struct node {
+char id[10], type[10];
+struct node *next;
+};
+struct node *h = NULL, *p = NULL, *t = NULL;
+%}
+%%
+int|float|char|double {
+strcpy(temp, yytext);
+}
+[a-zA-Z][a-zA-Z0-9]* {
+p = (struct node*)malloc(sizeof(struct node));
+if (p == NULL) {
+fprintf(stderr, "Overflow\n");
+exit(1);
+} else {
+strcpy(p->type, temp);
+strcpy(p->id, yytext);
+p->next = NULL;
+if (h == NULL) {
+h = p;
+} else {
+t = h;
+while (t->next != NULL) {
+t = t->next;
+}
+t->next = p;
+}
+}
+}
+"," {strcpy(pun,yytext);}
+";" {
+p = h;
+printf("ID\tData_Type\tAddress\n");
+while (p != NULL) {
+printf("%s\t%s\t\t%p\n", p->id, p->type, (void*)p);
+p = p->next;}
+}
+%%
+int main() {
+yylex();
+return 0;
+}
