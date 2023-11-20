@@ -298,7 +298,164 @@ lex exp5.l
 yacc -d exp5.y
 gcc lex.yy.c y.tab.c -ll
 ./a.out
+Enter the expression
+A+B
+
+Expression is valid
+
+Enter the expression
+A + B   
+
+Expression is invalid
+
 ___________________________________________________________________________________________________________________________________________________________________
 
+Experiment 6
 
+Control struct recognition using YACC
+
+Sorce code:
+Code in exp6.l:
+
+%{
+#include "y.tab.h"
+%}
+%%
+[+-]?[0-9]+ {return number;}
+"if" {return IF;}
+"else" {return ELSE;}
+"for" {return FOR;}
+"while" {return WHILE;}
+"check" { return 0; }
+[a-zA-Z][a-zA-Z0-9]* {return identifier;}
+[0-9][a-zA-Z0-9]+ {printf("id error .. %s ..",yytext); yyerror();}
+[ \t]+ {}
+[\n]+ {}
+"++" { return PLUSPLUS; }
+"--" { return MINUSMINUS; }
+"=="|">"|"<"|">="|"<="|"!=" { return RELATIONOPERATOR; }
+"=" { return EQUALTO; }
+"{" { return L_BRACE; }
+"}" { return R_BRACE; }
+"(" { return L_BRACKET; }
+")" { return R_BRACKET; }
+";" { return SEMICOLON; }
+%%
+
+
+
+Code in exp6.y:
+
+%{ 
+#include <stdio.h> 
+int flag = 1; 
+%}
+%token EOL identifier number IF ELSE FOR WHILE L_BRACE R_BRACE L_BRACKET
+%token R_BRACKET PLUSPLUS MINUSMINUS RELATIONOPERATOR EQUALTO SEMICOLON
+%%
+S:E|F|W;
+E : IF C B Y ;
+C : L_BRACKET X R_BRACKET ;
+B : L_BRACE R_BRACE ;
+Y : ELSE E | ELSE B | ;
+F : FOR L_BRACKET initial SEMICOLON X SEMICOLON identifier iterfunction R_BRACKET B ;
+initial : identifier | identifier EQUALTO operand ;
+iterfunction : PLUSPLUS | MINUSMINUS ;
+W : WHILE L_BRACKET X R_BRACKET B ;
+X : operand RELATIONOPERATOR operand ;
+operand : identifier | number ;
+%%
+int yyerror()
+{
+printf("Syntax Error");
+flag = 0;return 0;
+}
+void main(void)
+{
+    yyparse();
+    if (flag) 
+        printf("Syntax Correct");
+}
+
+Execution 
+
+lex exp6.l
+yacc -d exp6.y
+gcc lex.yy.c y.tab.c -ll
+./a.out
+if(a>b)
+{}
+else if(a<b)
+{}
+else
+{}
+check
+
+___________________________________________________________________________________________________________________________________________________________________
+
+Experiment 7
+
+Calculator using YACC
+
+Sorce code:
+Code in exp7.l
+
+%{
+#include<stdio.h>
+#include "y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+ {
+yylval=atoi(yytext);
+return NUMBER;
+}
+[\t] ;
+[\n] return 0;
+. return yytext[0];
+%%
+int yywrap()
+{
+return 1;
+}
+
+
+
+Code in exp7.y:
+
+%{
+#include<stdio.h>
+int flag=0;
+%}
+%token NUMBER
+%left '+' '-'
+%left '*' '/' '%'
+%left '(' ')'
+%%
+ArithmeticExpression: E{
+printf("\nResult=%d\n",$$);
+return 0;
+};
+E:E'+'E {$$=$1+$3;}
+|E'-'E {$$=$1-$3;}
+|E'*'E {$$=$1*$3;}
+|E'/'E {$$=$1/$3;}
+|E'%'E {$$=$1%$3;}
+|'('E')' {$$=$2;}| NUMBER {$$=$1;}
+;
+%%
+void main()
+{
+printf("\nEnter Any Arithmetic Expression which can have operations Addition, Subtraction,
+Multiplication, Divison, Modulus and Round brackets:\n");
+yyparse();
+if(flag==0)
+printf("\nEntered arithmetic expression is Valid\n\n");
+}
+void yyerror()
+{
+printf("\nEntered arithmetic expression is Invalid\n\n");
+flag=1;
+}
+OUTPUT:
 
