@@ -595,104 +595,131 @@ Code Optimization Technique
 Source code:
 Code in exp10.c
 
-#include<stdio.h>
-#include<string.h>
-struct op
-{
-char l;
-char r[20];
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct op {
+    char l[2];
+    char r[20];
+    struct op* next;
+};
+
+struct op* h = NULL, *p = NULL, *t = NULL, *t1 = NULL;
+
+int main() {
+    int len, i;
+    printf("Enter no of Values");
+    scanf("%d", &len);
+
+    for (i = 0; i < len; i++) {
+        p = (struct op*)malloc(sizeof(struct op));
+        printf("Left : ");
+        scanf("%s", p->l);
+        printf("right : ");
+        scanf("%s", p->r);
+        p->next = NULL;
+
+        if (h == NULL) {
+            h = p;
+        } else {
+            t = h;
+            while (t->next != NULL) {
+                t = t->next;
+            }
+            t->next = p;
+        }
+    }
+
+    t = h;
+    printf("Intermediate code\n");
+    while (t != NULL) {
+        printf("%s = %s\n", t->l, t->r);
+        t = t->next;
+    }
+
+    t = h;
+    while (t != NULL) {
+        if (t->next != NULL) {
+            p = t;
+            t1 = t->next;
+
+            while (t1 != NULL) {
+                if (strcmp(t->l, t1->l) == 0 && strcmp(t->r, t1->r) == 0) {
+            
+                    p->next = t1->next;
+         
+                    t1 = p->next;
+                    continue;  
+                }
+                t1 = t1->next;
+                p = p->next;
+            }
+        }
+        t = t->next;
+    }
+
+    t = h;
+    printf("Common code elimination\n");
+    while (t != NULL) {
+        printf("%s = %s\n", t->l, t->r);
+        t = t->next;
+    }
+
+	t = h;
+    while (t != NULL) {
+        if (t->next != NULL) {
+            p = t;
+            t1 = t->next;
+
+            while (t1 != NULL) {
+                if (strcmp(t->r, t1->l) == 0) {
+            	    strcpy(t->r,t1->r);
+                    p->next = t1->next;
+         
+                    t1 = p->next;
+                    continue;  
+                }
+                t1 = t1->next;
+                p = p->next;
+            }
+        }
+        t = t->next;
+    }
+
+    t = h;
+    printf("Dead Code elimination\n");
+    while (t != NULL) {
+        printf("%s = %s\n", t->l, t->r);
+        t = t->next;
+    }
+
+    return 0;
 }
-op[10],pr[10];
-void main()
-{
-int a,i,k,j,n,z=0,m,q;
-char *p,*l;
-char temp,t;
-char *tem;
-printf("Enter the Number of
-Values:"); scanf("%d",&n);
-for(i=0;i<n;i++)
-{
-printf("left: ");
-scanf(" %c",&op[i].l);
-printf("right: ");
-scanf(" %s",&op[i].r);
-}
-printf("Intermediate Code\n") ;
-for(i=0;i<n;i++)
-{
-printf("%c=",op[i].l);printf("%s\n",op[i].r);
-}
-for(i=0;i<n-1;i++)
-{
-temp=op[i].l;
-for(j=0;j<n;j++)
-{
-p=strchr(op[j].r,temp);
-if(p)
-{
-pr[z].l=op[i].l;
-strcpy(pr[z].r,op[i].
-r);
-z++;
-}}}
-pr[z].l=op[n-1].l;
-strcpy(pr[z].r,op[n-1].r);
-z++;
-printf("\nAfter Dead Code Elimination\n");
-for(k=0;k<z;k++)
-{
-printf("%c\t=",pr[k].l);
-printf("%s\n",pr[k].r);
-}
-for(m=0;m<z;m++)
-{
-tem=pr[m].r;
-for(j=m+1;j<z;j++){
-p=strstr(tem,pr[j].r);
-if(p)
-{
-t=pr[j].l;
-pr[j].l=pr[m].l;
-for(i=0;i<z;i++)
-{
-l=strchr(pr[i].r,t) ;
-if(l)
-{
-a=l-pr[i].r;
-printf("pos: %d\n",a);
-pr[i].r[a]=pr[m].l;
-}}}}}
-printf("Eliminate Common Expression\n");
-for(i=0;i<z;i++)
-{
-printf("%c\t=",pr[i].l);
-printf("%s\n",pr[i].r);
-}
-for(i=0;i<z;i++)
-{
-for(j=i+1;j<z;j++)
-{
-q=strcmp(pr[i].r,pr[j].r);
-if((pr[i].l==pr[j].l)&&!q)
-{pr[i].l='\0';
-}
-}
-}
-printf("Optimized Code\n");
-for(i=0;i<z;i++)
-{
-if(pr[i].l!='\0')
-{
-printf("%c=",pr[i].l);
-printf("%s\n",pr[i].r);
-}}}
 
 
 Execution
 
 gcc exp10.c
 ./a.out
+Enter no of Values3
+Left : a
+right : b
+Left : a
+right : b
+Left : a
+right : c
+Intermediate code
+a = b
+a = b
+a = c
+Common code elimination
+a = b
+a = c
+Dead Code elimination
+a = b
+a = c
+
 
 
 ___________________________________________________________________________________________________________________________________________________________________
