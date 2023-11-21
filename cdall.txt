@@ -493,18 +493,19 @@ Code in exp8.y
 char temp = 'A'-1;
 %}
 %token NUMBER LETTER
-%left "+" "-"
-%left "*" "/"
+%left '='
+%left '+' '-'
+%left '*' '/'
 %%
-start: LETTER "=" expr ";" {printf("%c = %c\n",$1,$3);};
-expr: expr "+" expr {$$=++temp;printf("%c = %c + %c\n",temp,$1,$3);}
-| expr "-" expr {$$=++temp;printf("%c = %c - %c\n",temp,$1,$3);}
-| expr "*" expr {$$=++temp;printf("%c = %c * %c\n",temp,$1,$3);}
-| expr "/" expr {$$=++temp;printf("%c = %c / %c\n",temp,$1,$3);}
-| "(" expr ")" {$$=++temp;printf("%c = %c \n",temp,$2);}
+start: LETTER '=' expr ';' { printf("%c = %c\n",$1,$3); }
+
+expr: expr '+' expr {$$ = ++temp; printf("%c = %c + %c\n",temp,$1,$3);}
+| expr '-' expr {$$ = ++temp; printf("%c = %c - %c\n",temp,$1,$3);}
+| expr '*' expr {$$ = ++temp; printf("%c = %c * %c\n",temp,$1,$3);}
+| expr '/' expr {$$ = ++temp; printf("%c = %c / %c\n",temp,$1,$3);}
+| '(' expr ')' {$$ = ++temp; printf("%c = %c \n",temp,$2); }
 | NUMBER {$$ = $1;}
 | LETTER {$$ = $1;}
-;
 %%
 int yyerror(){
 	printf("Error");
